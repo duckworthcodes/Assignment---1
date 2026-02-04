@@ -31,7 +31,7 @@
       overflow-x: hidden;
     }
 
-    /* ===== ANIMATED BACKGROUND ===== */
+  
     #canvas-bg {
       position: fixed;
       top: 0;
@@ -52,7 +52,7 @@
       pointer-events: none;
     }
 
-    /* ===== NAVBAR ===== */
+    
     header {
       position: fixed;
       top: 0;
@@ -186,7 +186,7 @@
       opacity: 0;
     }
 
-    /* ===== CARD ===== */
+  
     .card-container {
       width: 100%;
       max-width: 720px;
@@ -266,7 +266,7 @@
       font-weight: 600;
     }
 
-    /* ===== STATS ROW ===== */
+  
     .stats-row {
       display: flex;
       gap: 30px;
@@ -297,7 +297,7 @@
       margin-top: 4px;
     }
 
-    /* ===== FOOTER ===== */
+  
     footer {
       position: relative;
       z-index: 2;
@@ -309,7 +309,7 @@
       border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    /* ===== ANIMATIONS ===== */
+    
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -366,11 +366,11 @@
 
 <body>
 
-  <!-- Particle Canvas -->
+  
   <canvas id="canvas-bg"></canvas>
   <div class="grid-overlay"></div>
 
-  <!-- Navbar -->
+  
   <header>
     <div class="logo">Portfolio</div>
     <nav>
@@ -380,7 +380,7 @@
     </nav>
   </header>
 
-  <!-- Main Content -->
+  
   <div class="page-wrapper">
     <div class="hero-badge">Welcome to my world</div>
 
@@ -419,12 +419,12 @@
     </div>
   </div>
 
-  <!-- Footer -->
+  
   <footer>
-    <p>&copy; 2026 My Portfolio &mdash; Built with fire 🔥</p>
+    <p>&copy; 2026 My Portfolio  </p>
   </footer>
 
-  <!-- ===== PARTICLE JS ===== -->
+  
   <script>
     const canvas = document.getElementById('canvas-bg');
     const ctx = canvas.getContext('2d');
@@ -463,7 +463,7 @@
       }
     }
 
-    // Create particles
+    
     for (let i = 0; i < 80; i++) particles.push(new Particle());
 
     function connectLines() {
