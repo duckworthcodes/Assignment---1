@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00f0ff;
+      --secondary: #ff2d95;
+      --accent: #a855f7;
+      --bg-dark: #0a0a0f;
+      --card-bg: rgba(20, 20, 30, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--bg-dark);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== ANIMATED BACKGROUND ===== */
+    #canvas-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* ===== NAVBAR ===== */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 22px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 15, 0.6);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3em;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      gap: 35px;
+    }
+
+    nav a {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 1.05em;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      position: relative;
+      padding-bottom: 6px;
+      transition: color 0.3s;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.4s ease;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    nav a.active {
+      color: var(--primary);
+    }
+
+    nav a.active::after {
+      width: 100%;
+    }
+
+    /* ===== HERO / CONTENT ===== */
+    .page-wrapper {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 20px 100px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 30px;
+      font-size: 0.75em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 28px;
+      animation: fadeInDown 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.8em, 7vw, 5.5em);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.9s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .hero-title .line1 {
+      display: block;
+      color: #fff;
+    }
+
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 4s ease infinite, fadeInUp 0.9s ease 0.2s forwards;
+    }
+
+    .hero-sub {
+      font-size: 1.15em;
+      color: rgba(255, 255, 255, 0.45);
+      text-align: center;
+      max-width: 560px;
+      line-height: 1.8;
+      letter-spacing: 0.5px;
+      margin-bottom: 50px;
+      animation: fadeInUp 1s ease 0.45s forwards;
+      opacity: 0;
+    }
+
+    /* ===== CARD ===== */
+    .card-container {
+      width: 100%;
+      max-width: 720px;
+      animation: fadeInUp 1s ease 0.6s forwards;
+      opacity: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 18px;
+      padding: 45px 40px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 0 40px rgba(0, 240, 255, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+
+    .card:hover {
+      border-color: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 60px rgba(0, 240, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+      border-radius: 2px;
+    }
+
+    .card-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6em;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #fff;
+    }
+
+    .card p {
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.9;
+      font-size: 1.05em;
+      margin-bottom: 12px;
+      font-weight: 400;
+    }
+
+    .card p span.highlight {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: flex;
+      gap: 30px;
+      margin-top: 35px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8em;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.78em;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+      margin-top: 4px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 30px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.85em;
+      letter-spacing: 1px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.3);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Particle Canvas -->
+  <canvas id="canvas-bg"></canvas>
+  <div class="grid-overlay"></div>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo">Portfolio</div>
+    <nav>
+      <a href="index.html" class="active">About</a>
+      <a href="project.html">Projects</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <div class="page-wrapper">
+    <div class="hero-badge">Welcome to my world</div>
+
+    <h1 class="hero-title">
+      <span class="line1">Hello, I'm</span>
+      <span class="line2">A Web Developer</span>
+    </h1>
+
+    <p class="hero-sub">Crafting digital experiences from scratch using the power of HTML & CSS. Currently pursuing MCA
+      at UPES.</p>
+
+    <div class="card-container">
+      <div class="card">
+        <div class="card-label">About Me</div>
+        <h2>Who Am I?</h2>
+        <p>Hi, I am <span class="highlight">Vaibhav Verma</span> from <span class="highlight">MCA second semester,
+            UPES</span>. I am passionate about learning and building things on the web.</p>
+        <p>I love to develop websites using <span class="highlight">HTML</span> and <span class="highlight">CSS</span> —
+          turning ideas into reality, one line of code at a time.</p>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-number">3+</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">2</div>
+            <div class="stat-label">Skills</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Passion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 My Portfolio &mdash; Built with fire 🔥</p>
+  </footer>
+
+  <!-- ===== PARTICLE JS ===== -->
+  <script>
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let w, h;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() {this.reset();}
+      reset() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.6;
+        this.speedY = (Math.random() - 0.5) * 0.6;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.hue = Math.random() > 0.6 ? 190 : (Math.random() > 0.5 ? 280 : 330);
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > w) this.speedX *= -1;
+        if (this.y < 0 || this.y > h) this.speedY *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, 100%, 65%, ${this.opacity})`;
+        ctx.fill();
+      }
+    }
+
+    // Create particles
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function connectLines() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          let dx = particles[i].x - particles[j].x;
+          let dy = particles[i].y - particles[j].y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            let alpha = (1 - dist / 140) * 0.15;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 240, 255, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {p.update(); p.draw();});
+      connectLines();
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+
+</html>

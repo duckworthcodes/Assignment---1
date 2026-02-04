@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Me</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00f0ff;
+      --secondary: #ff2d95;
+      --accent: #a855f7;
+      --bg-dark: #0a0a0f;
+      --card-bg: rgba(20, 20, 30, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--bg-dark);
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #canvas-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* ===== NAVBAR ===== */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 22px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 15, 0.6);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3em;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      gap: 35px;
+    }
+
+    nav a {
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 1.05em;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      position: relative;
+      padding-bottom: 6px;
+      transition: color 0.3s;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.4s ease;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    nav a.active {
+      color: var(--primary);
+    }
+
+    nav a.active::after {
+      width: 100%;
+    }
+
+    /* ===== PAGE ===== */
+    .page-wrapper {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 140px 20px 100px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border: 1px solid rgba(255, 45, 149, 0.4);
+      border-radius: 30px;
+      font-size: 0.75em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 20px;
+      animation: fadeInDown 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    .page-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.4em, 5.5vw, 4em);
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 12px;
+      animation: fadeInUp 0.9s ease 0.2s forwards;
+      opacity: 0;
+    }
+
+    .page-title span {
+      background: linear-gradient(135deg, var(--secondary), var(--accent), var(--primary));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 4s ease infinite;
+    }
+
+    .page-subtitle {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.1em;
+      letter-spacing: 1px;
+      margin-bottom: 55px;
+      animation: fadeInUp 1s ease 0.35s forwards;
+      opacity: 0;
+    }
+
+    /* ===== FORM CARD ===== */
+    .card-container {
+      width: 100%;
+      max-width: 640px;
+      animation: fadeInUp 1s ease 0.55s forwards;
+      opacity: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 45, 149, 0.15);
+      border-radius: 18px;
+      padding: 48px 42px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(255, 45, 149, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 45, 149, 0.3);
+      box-shadow: 0 0 60px rgba(255, 45, 149, 0.1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--secondary), var(--accent), transparent);
+    }
+
+    .card-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--secondary);
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78em;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 13px 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.05em;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.35s, box-shadow 0.35s, background 0.35s;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 18px rgba(255, 45, 149, 0.18);
+      background: rgba(255, 45, 149, 0.04);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.22);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.6;
+    }
+
+    /* ===== SEND BUTTON ===== */
+    .btn-send {
+      width: 100%;
+      margin-top: 10px;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s, transform 0.2s;
+    }
+
+    .btn-send:hover {
+      box-shadow: 0 0 30px rgba(255, 45, 149, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-send:active {
+      transform: translateY(0);
+    }
+
+    .btn-send::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-send:hover::before {
+      left: 140%;
+    }
+
+    /* ===== SOCIAL SECTION ===== */
+    .social-section {
+      width: 100%;
+      max-width: 640px;
+      margin-top: 50px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease 0.8s forwards;
+    }
+
+    .social-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 18px;
+      padding: 38px 40px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+
+    .social-card:hover {
+      border-color: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 55px rgba(0, 240, 255, 0.1);
+    }
+
+    .social-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+    }
+
+    .social-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7em;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .social-label::before,
+    .social-label::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .social-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .social-card>p {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.95em;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 1.02em;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .social-btn.github {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+
+    .social-btn.github:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 28px rgba(255, 255, 255, 0.12);
+      transform: translateY(-3px);
+    }
+
+    .social-btn.github svg {
+      fill: #fff;
+    }
+
+    .social-btn.linkedin {
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.06);
+      color: #38bdf8;
+    }
+
+    .social-btn.linkedin:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.18);
+      transform: translateY(-3px);
+    }
+
+    .social-btn.linkedin svg {
+      fill: #38bdf8;
+    }
+
+    .social-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .social-btn:hover::before {
+      left: 140%;
+    }
+
+    .social-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 30px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.85em;
+      letter-spacing: 1px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 45, 149, 0.3);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="canvas-bg"></canvas>
+  <div class="grid-overlay"></div>
+
+  <header>
+    <div class="logo">Portfolio</div>
+    <nav>
+      <a href="index.html">About</a>
+      <a href="projects.html">Projects</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+  </header>
+
+  <div class="page-wrapper">
+    <div class="hero-badge">Get In Touch</div>
+    <h1 class="page-title">Contact <span>Me</span></h1>
+    <p class="page-subtitle">Feel free to send your query anytime</p>
+
+    <div class="card-container">
+      <div class="card">
+        <div class="card-label">Send a Message</div>
+
+        <form>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone No</label>
+              <input type="text" id="phone" name="phone" placeholder="+91 XXXXXXXXXX">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Write your message here..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-send">Send Message</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== GITHUB + LINKEDIN ===== -->
+    <div class="social-section">
+      <div class="social-card">
+        <div class="social-label">Or Connect Directly</div>
+        <h3>Let's Network</h3>
+        <p>Find me on GitHub or LinkedIn</p>
+        <div class="social-links">
+
+          <a href="https://github.com/duckworthcodes" target="_blank" class="social-btn github">
+            <!-- GitHub SVG -->
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+            GitHub
+          </a>
+
+          <a href="https://www.linkedin.com/in/vaibhav-verma1/" target="_blank" class="social-btn linkedin">
+            <!-- LinkedIn SVG -->
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+            </svg>
+            LinkedIn
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 My Portfolio &mdash; Built with fire 🔥</p>
+  </footer>
+
+  <!-- Particle JS -->
+  <script>
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [], w, h;
+
+    function resize() {w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight;}
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() {this.reset();}
+      reset() {
+        this.x = Math.random() * w; this.y = Math.random() * h;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.6;
+        this.speedY = (Math.random() - 0.5) * 0.6;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        this.hue = Math.random() > 0.6 ? 190 : (Math.random() > 0.5 ? 280 : 330);
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY;
+        if (this.x < 0 || this.x > w) this.speedX *= -1;
+        if (this.y < 0 || this.y > h) this.speedY *= -1;
+      }
+      draw() {
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, 100%, 65%, ${this.opacity})`; ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+    function connectLines() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          let dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 240, 255, ${(1 - dist / 140) * 0.15})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {p.update(); p.draw();});
+      connectLines(); requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+
+</html>
